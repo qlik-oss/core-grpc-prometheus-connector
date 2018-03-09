@@ -14,8 +14,8 @@ services:
   prom-connector:
     build: ../
     environment:
-#      GRPC_TRACE: all
-#      GRPC_VERBOSITY: DEBUG
+      GRPC_TRACE: none # all, http, etc.
+      GRPC_VERBOSITY: DEBUG
   prometheus:
     image: prom/prometheus:v2.1.0
     command: '--config.file=/etc/prometheus/prometheus.yml'
