@@ -23,7 +23,7 @@ def build_metadata(results):
   for field in fields:
     metadata.fieldInfo.extend([connector_pb2.FieldInfo(name = field)])
 
-  print('Metadata built {}'.format(metadata.fieldInfo))
+  #print('Metadata built {}'.format(metadata.fieldInfo))
 
   return metadata
 
@@ -36,21 +36,19 @@ def build_chunks(results, metadata):
 
   print('Building data chunks...')
 
-  print('Looping {} metrics...'.format(len(results)))
-
+  i = 0
   for result in results:
+    print('Loop {} out of {}'.format(i, len(results)))
     chunk = connector_pb2.DataChunk()
-    str_values = list()
-    str_values.extend([result['metric'].get('__name__', '')])
-    str_values.extend([str(i) for i in result['value']])
+    chunk.stringBucket.extend([result['metric'].get('__name__', '')])
+    chunk.stringBucket.extend([str(i) for i in result['value']])
     for field in metadata.fieldInfo:
-      str_values.extend([result['metric'].get(field.name, '')])
-    chunk.stringBucket.extend(str_values)
+      chunk.stringBucket.extend([result['metric'].get(field.name, '')])
+    chunk.stringCodes.extend([-1] * len(chunk.stringBucket))
+    i = i + 1
     yield chunk
 
   print('Data chunks built')
-
-  return chunk
 
 def fetch(prom_url, query_expr):
   """
