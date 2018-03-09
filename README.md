@@ -19,18 +19,18 @@ pip install -r requirements.txt
 python src/.
 ```
 
-### Build Docker image
-
-```bash
-docker build . -t prom-connector
-```
-
-## Regenerating code
+#### Regenerating code
 
 Update `./connector.proto` to a new version, then:
 
 ```bash
 python gen_code.py
+```
+
+### Build Docker image
+
+```bash
+docker build . -t prom-connector
 ```
 
 ## Running the example
