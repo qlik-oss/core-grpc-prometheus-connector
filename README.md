@@ -42,6 +42,6 @@ Requires Node.js version 9+.
 
 ```bash
 cd example
-docker-compose up -d
+docker-compose up -d --build --force-recreate
 node load-prom.js
 ```
