@@ -32,3 +32,16 @@ Update `./connector.proto` to a new version, then:
 ```bash
 python gen_code.py
 ```
+
+## Running the example
+
+The example is pretty rough right now and likely not in a working state, use
+at your own risk!
+
+Requires Node.js version 9+.
+
+```bash
+cd example
+docker-compose up -d
+node load-prom.js
+```

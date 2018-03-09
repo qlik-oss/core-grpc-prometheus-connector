@@ -1,7 +1,8 @@
 FROM python:3.6
 
-ADD . /app
+RUN mkdir /app
 WORKDIR /app
+ADD ./requirements.txt .
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
-WORKDIR /app/src
-CMD ["python", "."]
+ADD src/. .
+CMD ["python", "-u", "."]

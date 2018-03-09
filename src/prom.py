@@ -1,27 +1,68 @@
-import csv
 import requests
-import sys
+import connector_pb2
 
 # Inspired by https://github.com/RobustPerception/python_examples/blob/master/csv/query_csv.py
 
+def build_metadata(results):
+  """
+  Builds up the MetaData object needed by engine to figure out which fields
+  the data contain, and what type they are (we default to strings here).
+  """
+
+  print('Building metadata...')
+
+  fields = set(['name', 'timestamp', 'value'])
+  metadata = connector_pb2.GetDataResponse()
+
+  for result in results:
+    for metric in result['metric'].keys():
+      if (metric == '__name__'):
+        continue
+      fields.add(metric)
+
+  for field in fields:
+    metadata.fieldInfo.extend([connector_pb2.FieldInfo(name = field)])
+
+  print('Metadata built {}'.format(metadata.fieldInfo))
+
+  return metadata
+
+def build_chunks(results, metadata):
+  """
+  Builds up the DataChunk object, in this case we only build up one
+  but we could also build up several if the data is too large for
+  the streaming gRPC protocol.
+  """
+
+  print('Building data chunks...')
+
+  print('Looping {} metrics...'.format(len(results)))
+
+  for result in results:
+    chunk = connector_pb2.DataChunk()
+    str_values = list()
+    str_values.extend([result['metric'].get('__name__', '')])
+    str_values.extend([str(i) for i in result['value']])
+    for field in metadata.fieldInfo:
+      str_values.extend([result['metric'].get(field.name, '')])
+    chunk.stringBucket.extend(str_values)
+    yield chunk
+
+  print('Data chunks built')
+
+  return chunk
+
 def fetch(prom_url, query_expr):
+  """
+  Fetch data from Prometheus, transform it, and return gRPC-compatible
+  data structures.
+  """
+
+  print('Querying Prometheus...')
+
   response = requests.get('{0}/api/v1/query'.format(prom_url), params={ 'query': query_expr })
   results = response.json()['data']['result']
 
-  table_header = set()
-  for result in results:
-    table_header.update(result['metric'].keys())
+  print('Query complete')
 
-  table_header.discard('__name__')
-  table_header = sorted(table_header)
-
-  table = list()
-  table.append(['name', 'timestamp', 'value'] + table_header)
-
-  for result in results:
-    l = [result['metric'].get('__name__', '')] + result['value']
-    for label in table_header:
-      l.append(result['metric'].get(label, ''))
-    table.append(l)
-
-  return table
+  return results

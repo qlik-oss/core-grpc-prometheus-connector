@@ -20,11 +20,12 @@ async function _run() {
       qUserName: 'test',
       qPassword: 'test',
     });
-    const script = `
 //LOAD * FROM promdata.qvd;
-LIB CONNECT TO "prom";
-Buffer (Incremental) SQL *;
-STORE * INTO promdata.qvd;
+//Buffer (Incremental) SQL *;
+//STORE * INTO promdata.qvd;
+
+    const script = `
+LIB CONNECT TO "prom"; SQL *;
 `;
     await doc.setScript(script);
     const reload = doc.doReload();

@@ -1,6 +1,7 @@
 .vscode/
 .idea/
 __pycache__/
+node_modules/
 .DS_Store
 *.orig
 *.pyc
