@@ -46,7 +46,7 @@ docker-compose up -d --build --force-recreate
 cd ui
 npm i
 npx webpack --mode development
-open ui/index.html
+open dist/index.html
 ```
 
 ![Example](./example.png)
