@@ -1,5 +1,5 @@
 async function createObject(doc) {
-  return await doc.createSessionObject({
+  return doc.createSessionObject({
     qInfo: {
       qType: 'vis',
     },
@@ -9,7 +9,7 @@ async function createObject(doc) {
         { qDef: { qFieldDefs: ['scrape_timestamp'] } },
       ],
       qMeasures: [
-        { qDef: { qDef: "Sum({$<name={'qix_sessions_total'}>}value)" }  },
+        { qDef: { qDef: "Sum({$<name={'qix_sessions_total'}>}value)" } },
       ],
       qInitialDataFetch: [{
         qWidth: 3,
@@ -62,11 +62,11 @@ async function createChart(picasso, doc) {
       }, {
         type: 'grid-line',
         x: {
-          scale: 'x'
+          scale: 'x',
         },
         y: {
-          scale: 'y'
-        }
+          scale: 'y',
+        },
       }, {
         key: 'lines',
         type: 'line',

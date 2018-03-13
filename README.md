@@ -48,3 +48,5 @@ npm i
 npx webpack --mode development
 open ui/index.html
 ```
+
+![Example](./example.png)

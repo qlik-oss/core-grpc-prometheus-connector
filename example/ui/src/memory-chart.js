@@ -1,5 +1,5 @@
 async function createObject(doc) {
-  return await doc.createSessionObject({
+  return doc.createSessionObject({
     qInfo: {
       qType: 'vis',
     },
@@ -67,11 +67,11 @@ async function createChart(picasso, doc) {
       }, {
         type: 'grid-line',
         x: {
-          scale: 'x'
+          scale: 'x',
         },
         y: {
-          scale: 'y'
-        }
+          scale: 'y',
+        },
       }, {
         key: 'lines',
         type: 'line',
@@ -109,7 +109,7 @@ async function createChart(picasso, doc) {
 
   obj.on('changed', async () => {
     const layout = await obj.getLayout();
-    //console.log(layout.qHyperCube);
+    // console.log(layout.qHyperCube);
     chart.update({
       data: [{
         type: 'q',
