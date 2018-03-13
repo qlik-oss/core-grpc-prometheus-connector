@@ -43,5 +43,8 @@ Requires Node.js version 9+.
 ```bash
 cd example
 docker-compose up -d --build --force-recreate
-node load-prom.js
+cd ui
+npm i
+npx webpack --mode development
+open ui/index.html
 ```

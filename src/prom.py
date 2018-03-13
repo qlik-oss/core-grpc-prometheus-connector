@@ -1,7 +1,8 @@
 import requests
 import connector_pb2
+from datetime import timezone, datetime
 
-# Inspired by https://github.com/RobustPerception/python_examples/blob/master/csv/query_csv.py
+scrape_timestamp = None
 
 def build_metadata(results):
   """
@@ -11,14 +12,13 @@ def build_metadata(results):
 
   print('Building metadata...')
 
-  fields = set(['name', 'timestamp', 'value'])
+  fields = set(['name', 'timestamp', 'value', 'scrape_timestamp'])
   metadata = connector_pb2.GetDataResponse()
 
   for result in results:
     for metric in result['metric'].keys():
-      if (metric == '__name__'):
-        continue
-      fields.add(metric)
+      if metric != '__name__':
+        fields.add(metric)
 
   for field in fields:
     metadata.fieldInfo.extend([connector_pb2.FieldInfo(name = field)])
@@ -26,6 +26,44 @@ def build_metadata(results):
   #print('Metadata built {}'.format(metadata.fieldInfo))
 
   return metadata
+
+def set_value(result, fieldName, chunk):
+  is_string = True
+  value = None
+  if fieldName == 'name':
+    value = result['metric'].get('__name__', '')
+    #print(value)
+  elif fieldName == 'timestamp':
+    is_string = False
+    value = result['value'][0]
+  elif fieldName == 'value':
+    value = result['value'][1]
+    try:
+      value = float(value)
+      is_string = False
+    except ValueError:
+      pass
+  elif fieldName == 'scrape_timestamp':
+    value = scrape_timestamp
+    is_string = False
+  else:
+    value = result['metric'].get(fieldName, '')
+    if type(value) is float:
+      is_string = False
+
+  if is_string:
+    if len(value) == 0:
+      chunk.stringCodes.append(-1)
+      chunk.stringBucket.append('')
+      chunk.numberCodes.append(-1)      
+    else:
+      chunk.stringCodes.append(len(chunk.stringBucket))
+      chunk.stringBucket.append(str(value))
+      chunk.numberCodes.append(-1)
+  else:
+    chunk.numberCodes.append(len(chunk.doubleBucket))
+    chunk.doubleBucket.append(float(value))
+    chunk.stringCodes.append(-1)
 
 def build_chunks(results, metadata):
   """
@@ -35,17 +73,11 @@ def build_chunks(results, metadata):
   """
 
   print('Building data chunks...')
-
-  i = 0
+  print(metadata.fieldInfo)
   for result in results:
-    print('Loop {} out of {}'.format(i, len(results)))
     chunk = connector_pb2.DataChunk()
-    chunk.stringBucket.extend([result['metric'].get('__name__', '')])
-    chunk.stringBucket.extend([str(i) for i in result['value']])
     for field in metadata.fieldInfo:
-      chunk.stringBucket.extend([result['metric'].get(field.name, '')])
-    chunk.stringCodes.extend([-1] * len(chunk.stringBucket))
-    i = i + 1
+      set_value(result, field.name, chunk)
     yield chunk
 
   print('Data chunks built')
@@ -57,6 +89,8 @@ def fetch(prom_url, query_expr):
   """
 
   print('Querying Prometheus...')
+  global scrape_timestamp
+  scrape_timestamp = int(datetime.now(tz=timezone.utc).timestamp() * 1000)
 
   response = requests.get('{0}/api/v1/query'.format(prom_url), params={ 'query': query_expr })
   results = response.json()['data']['result']

@@ -16,7 +16,7 @@ class Service(connector_pb2_grpc.ConnectorServicer):
 
     print('Data fetched, sending initial metadata...')
     metadata = prom.build_metadata(results)
-    context.send_initial_metadata((('qlik-getdata-bin', metadata.SerializeToString()),))
+    context.send_initial_metadata((('x-qlik-getdata-bin', metadata.SerializeToString()),))
 
     print('Initial metadata sent, sending chunks...')
 

@@ -31,4 +31,3 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
   node-exporter:
     image: prom/node-exporter:v0.15.2
-    
