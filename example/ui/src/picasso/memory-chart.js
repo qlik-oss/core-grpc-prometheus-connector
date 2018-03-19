@@ -7,14 +7,14 @@ async function createObject(doc) {
       qDimensions: [
         { qDef: { qFieldDefs: ['name'] } },
         { qDef: { qFieldDefs: ['scrape_timestamp'] } },
-        { qDef: { qFieldDefs: ['container_label_com_docker_compose_service'] }, qNullSuppression: true },
+        { qDef: { qFieldDefs: ['container_label_com_docker_compose_service'], qFieldLabels: ['Container'] }, qNullSuppression: true },
       ],
       qMeasures: [
         { qDef: { qDef: "Sum({$<name={'container_memory_usage_bytes'}>}value)" } },
       ],
       qInitialDataFetch: [{
         qWidth: 4,
-        qHeight: 1000,
+        qHeight: 2000,
       }],
     },
   });
@@ -45,6 +45,16 @@ async function createChart(picasso, doc) {
           type: 'color',
         },
       },
+      interactions: [
+        {
+          type: 'native',
+          events: {
+            mousemove: function(e) {
+              this.chart.component('tooltip').emit('hover', e);
+            }
+          }
+        }
+      ],
       components: [{
         key: 'ax1',
         type: 'axis',
@@ -67,7 +77,7 @@ async function createChart(picasso, doc) {
       }, {
         type: 'grid-line',
         x: {
-          scale: 'x',
+          scale: 't',
         },
         y: {
           scale: 'y',
@@ -99,17 +109,44 @@ async function createChart(picasso, doc) {
           },
         },
       }, {
+        key: 'points',
+        type: 'point',
+        data: {
+          extract: {
+            field: 'qDimensionInfo/1',
+            value: v => v.qNum,
+            props: {
+              text: { field: 'qDimensionInfo/2' },
+              y: { field: 'qMeasureInfo/0' }
+            }
+          }
+        },
+        settings: {
+          x: { scale: 't' },
+          y: { scale: 'y' },
+          size: function(d, i) {
+            return 0.25;
+          },
+          fill: function(d, i) {
+            return 'rgba(200, 50, 50, 0.2)';
+          }
+        }
+      }, {
         key: 'legend',
         type: 'legend-cat',
         scale: 'color',
         dock: 'right',
+      }, {
+        key: 'tooltip',
+        type: 'tooltip',
+        background: 'white' // Override our default setting
       }],
     },
   });
 
   obj.on('changed', async () => {
     const layout = await obj.getLayout();
-    // console.log(layout.qHyperCube);
+    console.log(layout.qHyperCube);
     chart.update({
       data: [{
         type: 'q',
