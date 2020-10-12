@@ -1,5 +1,7 @@
 # core-grpc-prometheus-connector
 
+*As of 1 July 2020, Qlik Core is no longer available to new customers. No further maintenance will be done in this repository.*
+
 ## Get started
 
 The connector supports two parameters passed in from the connection string, `promHost=some-host:9090`, and `promQuery=some-promql-expression`. 
